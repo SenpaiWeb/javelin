@@ -1,0 +1,22 @@
+{
+	"name": "javelin",
+	"version": "0.2.0",
+	"description": "A simple yet powerful Twitch IRC/WebSocket wrapper.",
+	"main": "src/index.js",
+	"scripts": {
+		"test": ""
+	},
+	"author": "iCrawl <icrawltogo@gmail.com>",
+	"license": "UNLICENSED",
+	"dependencies": {
+		"ws": "^6.0.0"
+	},
+	"devDependencies": {
+		"dotenv": "^6.0.0",
+		"eslint": "^5.4.0",
+		"eslint-config-aqua": "^4.3.4"
+	},
+	"eslintConfig": {
+		"extends": "aqua/node"
+	}
+}
