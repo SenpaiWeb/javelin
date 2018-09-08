@@ -1,5 +1,14 @@
 const WS = require('ws');
+const Channel = require('../../structs/Channel');
 const Message = require('../../structs/Message');
+
+// TODO: remove this dirty hack
+Map.prototype.find = function(fn) {
+	for (const [key, val] of this) {
+		if (fn(val, key, this)) return val;
+	}
+	return undefined;
+}
 
 /**
  * The WebSocket Manager.
@@ -38,10 +47,11 @@ class WebSocket {
 	}
 
 	/**
-	 * TODO: Implement `CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands`
+	 * TODO: Refactor `CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands`
 	 */
 	onOpen() {
 		this.client.emit('debug', 'Connecting');
+		this.ws.send(`CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands`);
 		this.ws.send(`PASS ${this.options.oauth}`);
 		this.ws.send(`NICK ${this.options.username}`);
 		for (const channel of this.options.channels) {
@@ -65,8 +75,23 @@ class WebSocket {
 		if (packet.data.includes('001')) {
 			this.client.emit('ready', 'Ready! Woop!');
 		}
+		if (packet.data.includes('msg_channel_suspended')) {
+			this.client.emit('warn', packet.data.match(/[\s\S]*#(.*?) /)[1], packet.data.replace(/@.*?:.*?:/, ''));
+		}
+		if (packet.data.includes('ROOMSTATE')) {
+			const channel = new Channel(this.client, packet.data);
+			this.client.channels.set(channel.id, channel);
+			this.client.emit('channel_join', channel);
+		}
+		if (packet.data.includes('PART')) {
+			const REGEX = new RegExp(`${this.client.options.username}.*#(.*)`);
+			if (!REGEX.test(packet.data)) return;
+			const channel = this.client.channels.find(c => c.name === packet.data.match(REGEX)[1].toLowerCase());
+			this.client.emit('channel_leave', 'test', channel, packet.data.match(REGEX)[1].toLowerCase());
+			this.client.channels.delete(channel.id);
+		}
 		if (packet.data.includes('PRIVMSG')) {
-			this.client.emit('message', new Message(this, packet.data));
+			this.client.emit('message', new Message(this.client, packet.data));
 		}
 		if (packet.data.includes('PING')) {
 			this.ws.send('PONG :tmi.twitch.tv');

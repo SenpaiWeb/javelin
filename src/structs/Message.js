@@ -1,4 +1,3 @@
-const Channel = require('./Channel');
 const User = require('./User');
 
 /**
@@ -35,7 +34,7 @@ class Message {
 		 * The emotes of the message
 		 * @type {Array<string>}
 		 */
-		this.emotes = data.match(/emotes=(.*?);/)[1] ? data.match(/emotes=(.*?);/)[1].split('/') : [];
+		this._emotes = data.match(/emotes=(.*?);/)[1] ? data.match(/emotes=(.*?);/)[1].split('/') : [];
 
 		/**
 		 * The timestamp of the message
@@ -47,7 +46,7 @@ class Message {
 		 * The channel the message belongs to
 		 * @type {Channel}
 		 */
-		this.channel = new Channel(client, data);
+		this.channel = this.client.channels.get(parseInt(data.match(/room-id=(.*?);/)[1], 10));
 
 		/**
 		 * The user the message belongs to
@@ -65,6 +64,18 @@ class Message {
 	 */
 	get createdAt() {
 		return new Date(this.timestamp);
+	}
+
+	get emotes() {
+		/**
+		 * http://static-cdn.jtvnw.net/emoticons/v1/
+		 */
+		if (!this._emotes.length) return [];
+		const emotes = [];
+		for (const emote of this._emotes) {
+			emotes.push(`http://static-cdn.jtvnw.net/emoticons/v1/${emote.split(':')[0]}/3.0`);
+		}
+		return emotes;
 	}
 
 	/**

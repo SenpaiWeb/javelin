@@ -19,6 +19,12 @@ class Client extends EventEmitter {
 		 * @private
 		 */
 		this.ws = new WebSocket(this, options);
+
+		/**
+		 * The channels collection
+		 * @type {Map<string, Channel>}
+		 */
+		this.channels = new Map();
 	}
 
 	/**
@@ -69,6 +75,12 @@ module.exports = Client;
  */
 
 /**
+  * Emitted for warnings.
+  * @event Client#warn
+  * @param {string} info The warning
+  */
+
+/**
  * Emitted whenever an error is encountered.
  * @event Client#error
  * @param {Error} error The error
@@ -84,4 +96,16 @@ module.exports = Client;
  * Emitted for every message received.
  * @event Client#message
  * @param {Object} message The message
+ */
+
+/**
+ * Emitted when the bot joins a channel.
+ * @event Client#channel_join
+ * @param {Object} channel The channel
+ */
+
+/**
+ * Emitted when the bot leaves a channel.
+ * @event Client#channel_leave
+ * @param {Object} channel The channel
  */

@@ -67,13 +67,13 @@ class User {
 		 * Whether this user is a moderator
 		 * @type {boolean}
 		 */
-		this.moderator = Boolean(parseInt(data.match(/mod=(.*?);/)[1], 10)) || this.badges.includes('moderator');
+		this.moderator = this.badges.includes('moderator') || Boolean(parseInt(data.match(/mod=(.*?);/)[1], 10));
 
 		/**
 		 * Whether this user is a subscriber
 		 * @type {boolean}
 		 */
-		this.subscriber = Boolean(parseInt(data.match(/subscriber=(.*?);/)[1], 10)) || this.badges.includes('subscriber');
+		this.subscriber = this.badges.includes('subscriber') || Boolean(parseInt(data.match(/subscriber=(.*?);/)[1], 10));
 
 		/**
 		 * Whether this user is Twitch staff
@@ -85,7 +85,7 @@ class User {
 		 * Whether this user has Twitch Turbo
 		 * @type {boolean}
 		 */
-		this.turbo = Boolean(parseInt(data.match(/turbo=(.*?);/)[1], 10)) || this.badges.includes('turbo');
+		this.turbo = this.badges.includes('turbo') || Boolean(parseInt(data.match(/turbo=(.*?);/)[1], 10));
 
 		/**
 		 * Whether this user has Amazon Prime
