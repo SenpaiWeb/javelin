@@ -86,8 +86,9 @@ class WebSocket {
 		if (packet.data.includes('PART')) {
 			const REGEX = new RegExp(`${this.client.options.username}.*#(.*)`);
 			if (!REGEX.test(packet.data)) return;
-			const channel = this.client.channels.find(c => c.name === packet.data.match(REGEX)[1].toLowerCase());
-			this.client.emit('channel_leave', 'test', channel, packet.data.match(REGEX)[1].toLowerCase());
+			const channelName = packet.data.match(REGEX)[1].toLowerCase();
+			const channel = this.client.channels.find(c => c.name === channelName);
+			this.client.emit('channel_leave', 'test', channel, channelName);
 			this.client.channels.delete(channel.id);
 		}
 		if (packet.data.includes('PRIVMSG')) {
