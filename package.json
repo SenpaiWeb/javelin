@@ -1,13 +1,13 @@
 {
 	"name": "javelin",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "A simple yet powerful Twitch IRC/WebSocket wrapper.",
 	"main": "src/index.js",
 	"scripts": {
 		"test": ""
 	},
 	"author": "iCrawl <icrawltogo@gmail.com>",
-	"license": "UNLICENSED",
+	"license": "MIT",
 	"dependencies": {
 		"ws": "^6.0.0"
 	},
