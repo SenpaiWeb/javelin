@@ -1,4 +1,5 @@
 const WS = require('ws');
+const parser = require('../../lib/parser');
 const Channel = require('../../structs/Channel');
 const Message = require('../../structs/Message');
 
@@ -8,7 +9,7 @@ Map.prototype.find = function(fn) {
 		if (fn(val, key, this)) return val;
 	}
 	return undefined;
-}
+};
 
 /**
  * The WebSocket Manager.
@@ -72,27 +73,28 @@ class WebSocket {
 	 */
 	onMessage(packet) {
 		this.client.emit('debug', packet.data);
-		if (packet.data.includes('001')) {
+		const parsed = parser(packet.data);
+		this.client.emit('message', parsed);
+		if (parsed.command === '001') {
 			this.client.emit('ready', 'Ready! Woop!');
 		}
-		if (packet.data.includes('msg_channel_suspended')) {
-			this.client.emit('warn', packet.data.match(/[\s\S]*#(.*?) /)[1], packet.data.replace(/@.*?:.*?:/, ''));
+		if (parsed.params.includes('NOTICE')) {
+			this.client.emit('warn', parsed.params);
 		}
-		if (packet.data.includes('ROOMSTATE')) {
-			const channel = new Channel(this.client, packet.data);
+		if (parsed.params.includes('ROOMSTATE')) {
+			const channel = new Channel(this.client, parsed);
 			this.client.channels.set(channel.id, channel);
 			this.client.emit('channel_join', channel);
 		}
-		if (packet.data.includes('PART')) {
-			const REGEX = new RegExp(`${this.client.options.username}.*#(.*)`);
-			if (!REGEX.test(packet.data)) return;
-			const channelName = packet.data.match(REGEX)[1].toLowerCase();
+		if (parsed.command === 'PART') {
+			if (!parsed.prefix.includes(this.client.options.username)) return;
+			const channelName = parsed.params[0].toLowerCase();
 			const channel = this.client.channels.find(c => c.name === channelName);
-			this.client.emit('channel_leave', 'test', channel, channelName);
+			this.client.emit('channel_leave', channel);
 			this.client.channels.delete(channel.id);
 		}
 		if (packet.data.includes('PRIVMSG')) {
-			this.client.emit('message', new Message(this.client, packet.data));
+			this.client.emit('message', new Message(this.client, parsed));
 		}
 		if (packet.data.includes('PING')) {
 			this.ws.send('PONG :tmi.twitch.tv');

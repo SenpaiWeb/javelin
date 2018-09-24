@@ -21,32 +21,32 @@ class Message {
 		 * The ID of the message
 		 * @type {string}
 		 */
-		this.id = data.match(/id=(.*?);/)[1];
+		this.id = data.tags.id;
 
 		/**
 		 * The content of the message
 		 * TODO: this needs some heavy refactoring right here
 		 * @type {string}
 		 */
-		this.content = data.replace(/emotes=(.*?);/, '').replace(/@.*?:.*?:/, '').replace(/\u0001ACTION\s(.*?)\u0001/, '$1').replace(/\r\n|\n|\r/g, '');
+		this.content = data.params[2];
 
 		/**
 		 * The emotes of the message
 		 * @type {Array<string>}
 		 */
-		this._emotes = data.match(/emotes=(.*?);/)[1] ? data.match(/emotes=(.*?);/)[1].split('/') : [];
+		this._emotes = data.tags.emotes ? data.tags.emotes.split('/') : [];
 
 		/**
 		 * The timestamp of the message
 		 * @type {number}
 		 */
-		this.timestamp = new Date(parseInt(data.match(/tmi-sent-ts=(.*?);/)[1], 10)).getTime();
+		this.timestamp = new Date(parseInt(data.tags['tmi-sent-ts'], 10)).getTime();
 
 		/**
 		 * The channel the message belongs to
 		 * @type {Channel}
 		 */
-		this.channel = this.client.channels.get(parseInt(data.match(/room-id=(.*?);/)[1], 10));
+		this.channel = this.client.channels.get(parseInt(data.tags['room-id'], 10));
 
 		/**
 		 * The user the message belongs to

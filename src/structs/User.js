@@ -19,31 +19,31 @@ class User {
 		 * The ID of the user
 		 * @type {number}
 		 */
-		this.id = parseInt(data.match(/user-id=(.*?);/)[1], 10);
+		this.id = parseInt(data.tags['user-id'], 10);
 
 		/**
 		 * The username of the user
 		 * @type {string}
 		 */
-		this.username = data.match(/!(.*?)@/)[1];
+		this.username = data.command.match(/!(.*?)@/)[1];
 
 		/**
 		 * The display name of the user (case-sensitive)
 		 * @type {string}
 		 */
-		this.displayName = data.match(/display-name=(.*?);/)[1];
+		this.displayName = data.tags['display-name'];
 
 		/**
 		 * The color of the user
 		 * @type {string}
 		 */
-		this.color = data.match(/color=(.*?);/)[1];
+		this.color = data.tags.color;
 
 		/**
 		 * The badges of the user
 		 * @type {Array<string>}
 		 */
-		this.badges = data.match(/@badges=(.*?);/) ? data.match(/@badges=(.*?);/)[1].split(',') : [];
+		this.badges = data.tags.badges ? data.tags.badges.split(',') : [];
 
 		/**
 		 * Whether this user is a Twitch admin
@@ -67,13 +67,13 @@ class User {
 		 * Whether this user is a moderator
 		 * @type {boolean}
 		 */
-		this.moderator = this.badges.includes('moderator') || Boolean(parseInt(data.match(/mod=(.*?);/)[1], 10));
+		this.moderator = this.badges.includes('moderator') || Boolean(parseInt(data.tags.mod, 10));
 
 		/**
 		 * Whether this user is a subscriber
 		 * @type {boolean}
 		 */
-		this.subscriber = this.badges.includes('subscriber') || Boolean(parseInt(data.match(/subscriber=(.*?);/)[1], 10));
+		this.subscriber = this.badges.includes('subscriber') || Boolean(parseInt(data.tags.subscriber, 10));
 
 		/**
 		 * Whether this user is Twitch staff
@@ -85,7 +85,7 @@ class User {
 		 * Whether this user has Twitch Turbo
 		 * @type {boolean}
 		 */
-		this.turbo = this.badges.includes('turbo') || Boolean(parseInt(data.match(/turbo=(.*?);/)[1], 10));
+		this.turbo = this.badges.includes('turbo') || Boolean(parseInt(data.tags.turbo, 10));
 
 		/**
 		 * Whether this user has Amazon Prime
