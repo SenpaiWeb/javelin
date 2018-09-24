@@ -72,7 +72,7 @@ class Channel {
 	 * @returns {void}
 	 */
 	send(message) {
-		this.client.ws.send(`PRIVMSG #${this.name} :${message}`);
+		this.client.ws.send(`PRIVMSG ${this.name} :${message}`);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class Channel {
 	 * @returns {void}
 	 */
 	leave() {
-		this.client.ws.send(`PART #${this.name}`);
+		this.client.ws.send(`PART ${this.name}`);
 	}
 
 	/**
@@ -88,7 +88,7 @@ class Channel {
 	 * @returns {string}
 	 */
 	toString() {
-		return `#${this.name}`;
+		return `${this.name}`;
 	}
 }
 

@@ -56,7 +56,7 @@ class WebSocket {
 		this.ws.send(`PASS ${this.options.oauth}`);
 		this.ws.send(`NICK ${this.options.username}`);
 		for (const channel of this.options.channels) {
-			this.ws.send(`JOIN #${channel}`);
+			this.ws.send(`JOIN ${channel}`);
 		}
 	}
 

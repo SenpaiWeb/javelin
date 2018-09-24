@@ -34,8 +34,8 @@ class Client extends EventEmitter {
 	 */
 	joinChannel(channel) {
 		if (!channel) return;
-		this.ws.send(`JOIN #${channel}`);
-		this.emit('debug', `Joined channel #${channel}`);
+		this.ws.send(`JOIN ${channel}`);
+		this.emit('debug', `Joined channel ${channel}`);
 	}
 
 	/**
@@ -45,8 +45,8 @@ class Client extends EventEmitter {
 	 */
 	leaveChannel(channel) {
 		if (!channel) return;
-		this.ws.send(`PART #${channel}`);
-		this.emit('debug', `Left channel #${channel}`);
+		this.ws.send(`PART ${channel}`);
+		this.emit('debug', `Left channel ${channel}`);
 	}
 
 	/**
