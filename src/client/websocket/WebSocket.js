@@ -87,11 +87,21 @@ class WebSocket {
 			this.client.emit('channel_join', channel);
 		}
 		if (parsed.command === 'PART') {
-			if (!parsed.prefix.includes(this.client.options.username)) return;
 			const channelName = parsed.params[0].toLowerCase();
+			if (!parsed.prefix.includes(this.client.options.username)) {
+				const username = parsed.prefix.split('!')[0];
+				this.client.emit('user_leave', username, channelName);
+				return;
+			}
 			const channel = this.client.channels.find(c => c.name === channelName);
 			this.client.emit('channel_leave', channel);
 			this.client.channels.delete(channel.id);
+		}
+		if (parsed.command === 'JOIN') {
+			if (parsed.prefix.includes(this.client.options.username)) return;
+			const username = parsed.prefix.split('!')[0];
+			const channelName = parsed.params[0].toLowerCase();
+			this.client.emit('user_join', username, channelName);
 		}
 		if (packet.data.includes('PRIVMSG')) {
 			this.client.emit('message', new Message(this.client, parsed));
