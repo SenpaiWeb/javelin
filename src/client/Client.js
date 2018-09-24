@@ -109,3 +109,17 @@ module.exports = Client;
  * @event Client#channel_leave
  * @param {Object} channel The channel
  */
+
+/**
+ * Emitted when a user leaves a channel.
+ * @event Client#user_join
+ * @param {string} user The user
+ * @param {string} channel The channel
+ */
+
+/**
+ * Emitted when a user leaves a channel.
+ * @event Client#user_leave
+ * @param {string} user The user
+ * @param {string} channel The channel
+ */
