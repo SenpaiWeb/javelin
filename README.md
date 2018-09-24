@@ -23,8 +23,6 @@ I'll get into filling this out later, gotta stay tuned for now.
 <br>
 <br>
 <br>
-<br>
-<br>
 
 # Example
 
