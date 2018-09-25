@@ -74,7 +74,6 @@ class WebSocket {
 	onMessage(packet) {
 		this.client.emit('debug', packet.data);
 		const parsed = parser(packet.data);
-		this.client.emit('message', parsed);
 		if (parsed.command === '001') {
 			this.client.emit('ready', 'Ready! Woop!');
 		}
