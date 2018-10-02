@@ -1,3 +1,4 @@
+// TODO: One day comment all of this so anyone even knows whats going on here
 function parse(data) {
 	data = data.replace(/\r\n|\n|\r/g, '');
 	const message = {
