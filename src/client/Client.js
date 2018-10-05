@@ -95,19 +95,19 @@ module.exports = Client;
 /**
  * Emitted for every message received.
  * @event Client#message
- * @param {Object} message The message
+ * @param {Message} message The message
  */
 
 /**
  * Emitted when the bot joins a channel.
  * @event Client#channel_join
- * @param {Object} channel The channel
+ * @param {Channel} channel The channel
  */
 
 /**
  * Emitted when the bot leaves a channel.
  * @event Client#channel_leave
- * @param {Object} channel The channel
+ * @param {Channel} channel The channel
  */
 
 /**
