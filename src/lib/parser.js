@@ -1,4 +1,3 @@
-// TODO: One day comment all of this so anyone even knows whats going on here
 function parse(data) {
 	data = data.replace(/\r\n|\n|\r/g, '');
 	const message = {
@@ -10,33 +9,47 @@ function parse(data) {
 	};
 
 	let pos = 0;
-	let space = 0;
+	let spacePos = 0;
 
-	if (data.charCodeAt(0) === 64) {
-		space = data.indexOf(' ');
-		if (space === -1) return null;
+	// Discards whitespace until the next character isn't.
+	const skipSpaces = () => {
+		while (data[pos] === ' ') pos++;
+	};
 
-		const rawTags = data.slice(1, space).split(';');
+	// Updates the position based on whitespace position to ensure that spacePos < pos after skipping whitespace.
+	const updatePosition = () => {
+		pos = spacePos + 1;
+	}
+
+	skipSpaces();
+	// Parses tags which are in the form '@' <tags> <space>
+	// where <tags> are in the form <key> '=' <value>, delimited by ';'.
+	if (data[pos] === '@') {
+		spacePos = data.indexOf(' ');
+		if (spacePos === -1) return null;
+		const rawTags = data.slice(pos + 1, spacePos).split(';');
 		for (const tag of rawTags) {
-			const pair = tag.split('=');
-			message.tags[pair[0]] = pair[1] || '';
+			const [key, value = ''] = tag.split('=');
+			message.tags[key] = value || '';
 		}
-		pos = space + 1;
+
+		updatePosition();
 	}
-	while (data.charCodeAt(pos) === 32) pos++;
 
-	if (data.charCodeAt(0) === 58) {
-		space = data.indexOf(' ', pos);
-		if (space === -1) return null;
-
-		message.prefix = data.slice(pos + 1, space);
-		pos = space + 1;
-
-		while (data.charCodeAt(pos) === 32) pos++;
+	skipSpaces();
+	// Parses the prefix which is in the form ':' <prefix> <space>.
+	if (data[pos] === ':') {
+		spacePos = data.indexOf(' ', pos);
+		if (spacePos === -1) return null;
+		message.prefix = data.slice(pos + 1, spacePos);
+		updatePosition();
+		skipSpaces();
 	}
-	space = data.indexOf(' ', pos);
 
-	if (space === -1) {
+	spacePos = data.indexOf(' ', pos);
+	// Parses a command with no parameters.
+	if (spacePos === -1) {
+		// Make sure there is still text, i.e. there is a command.
 		if (data.length > pos) {
 			message.command = data.slice(pos);
 			return message;
@@ -44,25 +57,32 @@ function parse(data) {
 
 		return null;
 	}
-	message.command = data.slice(pos, space);
-	pos = space + 1;
 
-	while (data.charCodeAt(pos) === 32) pos++;
+	// Parses a command with parameters.
+	// This is in the form <command> <space> <params> where <params> are space delimited values and
+	// the parameter beginning with ':' would take the rest of the input string.
+	message.command = data.slice(pos, spacePos);
+	updatePosition();
+	skipSpaces();
 	while (pos < data.length) {
-		space = data.indexOf(' ', pos);
-		if (data.charCodeAt(pos) === 58) {
+		spacePos = data.indexOf(' ', pos);
+		// When on the ':' parameter.
+		if (data[pos] === ':') {
 			message.params.push(data.slice(pos + 1));
 			break;
 		}
-		if (space !== -1) {
-			message.params.push(data.slice(pos, space));
-			pos = space + 1;
-			while (data.charCodeAt(pos) === 32) pos++;
-			continue;
-		}
-		if (space === -1) {
+
+		// When on the last parameter.
+		if (spacePos === -1) {
 			message.params.push(data.slice(pos));
 			break;
+		}
+
+		if (spacePos !== -1) {
+			message.params.push(data.slice(pos, spacePos));
+			updatePosition();
+			skipSpaces();
+			continue;
 		}
 	}
 
