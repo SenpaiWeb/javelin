@@ -3,13 +3,13 @@ const parser = require('../../lib/parser');
 const Channel = require('../../structs/Channel');
 const Message = require('../../structs/Message');
 
-// TODO: remove this dirty hack
-Map.prototype.find = function(fn) {
-	for (const [key, val] of this) {
-		if (fn(val, key, this)) return val;
+function find(map, fn) {
+	for (const [key, val] of map) {
+		if (fn(val, key, map)) return val;
 	}
-	return undefined;
-};
+
+	return undefined; // eslint-disable-line no-undefined
+}
 
 /**
  * The WebSocket Manager.
@@ -92,7 +92,7 @@ class WebSocket {
 				this.client.emit('user_leave', username, channelName);
 				return;
 			}
-			const channel = this.client.channels.find(c => c.name === channelName);
+			const channel = find(this.client.channels, c => c.name === channelName);
 			this.client.emit('channel_leave', channel);
 			this.client.channels.delete(channel.id);
 		}
