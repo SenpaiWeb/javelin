@@ -1,30 +1,30 @@
-const EventEmitter = require('events');
-const WebSocket = require('./websocket/WebSocket');
+import * as EventEmitter from 'events';
+import WebSocket from './websocket/WebSocket.js';
+import Channel from '../structs/Channel';
 
 /**
  * The client.
  * @extends {EventEmitter}
  */
-class Client extends EventEmitter {
+export default class Client extends EventEmitter {
+	/**
+	 * The WebSocket manager for this client
+	 * @type {WebSocket}
+	 * @private
+	 */
+	private ws = new WebSocket(this, this.options);
+
+	/**
+	 * The channels collection
+	 * @type {Map<number, Channel>}
+	 */
+	public channels: Map<number, Channel> = new Map();
+
 	/**
 	 * @param {ClientOptions} [options] Options for the client
 	 */
-	constructor(options = {}) {
+	public constructor(public readonly options = {}) {
 		super();
-		this.options = options;
-
-		/**
-		 * The WebSocket manager for this client
-		 * @type {WebSocket}
-		 * @private
-		 */
-		this.ws = new WebSocket(this, options);
-
-		/**
-		 * The channels collection
-		 * @type {Map<string, Channel>}
-		 */
-		this.channels = new Map();
 	}
 
 	/**
@@ -32,7 +32,7 @@ class Client extends EventEmitter {
 	 * @param {string} channel The channel to join
 	 * @returns {void}
 	 */
-	joinChannel(channel) {
+	public joinChannel(channel: string) {
 		if (!channel) return;
 		this.ws.send(`JOIN ${channel}`);
 		this.emit('debug', `Joined channel ${channel}`);
@@ -43,7 +43,7 @@ class Client extends EventEmitter {
 	 * @param {string} channel The channel to leave
 	 * @returns {void}
 	 */
-	leaveChannel(channel) {
+	public leaveChannel(channel: string) {
 		if (!channel) return;
 		this.ws.send(`PART ${channel}`);
 		this.emit('debug', `Left channel ${channel}`);
@@ -53,7 +53,7 @@ class Client extends EventEmitter {
 	 * Logs the client in and establishes a websocket connection to twitch.
 	 * @returns {void}
 	 */
-	login() {
+	public login() {
 		this.ws.connect();
 	}
 
@@ -61,12 +61,10 @@ class Client extends EventEmitter {
 	 * Logs the client out and terminates the websocket connection to twitch.
 	 * @returns {void}
 	 */
-	destroy() {
+	public destroy() {
 		this.ws.close();
 	}
 }
-
-module.exports = Client;
 
 /**
  * Emitted for debugging purposes.
@@ -75,10 +73,10 @@ module.exports = Client;
  */
 
 /**
-  * Emitted for warnings.
-  * @event Client#warn
-  * @param {string} info The warning
-  */
+ * Emitted for warnings.
+ * @event Client#warn
+ * @param {string} info The warning
+ */
 
 /**
  * Emitted whenever an error is encountered.

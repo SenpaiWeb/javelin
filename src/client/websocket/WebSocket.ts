@@ -1,45 +1,39 @@
-const WS = require('ws');
-const parser = require('../../lib/parser');
-const Channel = require('../../structs/Channel');
-const Message = require('../../structs/Message');
+import * as WS from 'ws';
+import parser from '../../lib/parser';
+import Channel from '../../structs/Channel';
+import Message from '../../structs/Message';
+import Client from '../Client';
 
-function find(map, fn) {
+// tslint:disable-next-line
+function find(map: Map<any, any>, fn: Function) {
 	for (const [key, val] of map) {
 		if (fn(val, key, map)) return val;
 	}
 
-	return undefined; // eslint-disable-line no-undefined
+	return undefined;
 }
 
 /**
  * The WebSocket Manager.
  */
-class WebSocket {
+export default class WebSocket {
+	/**
+	 * The WebSocket connection of this manager
+	 * @type {?WebSocketConnection}
+	 */
+	public ws?: WS;
+
 	/**
 	 * @param {Client} client The client
 	 * @param {Object} options The options
 	 */
-	constructor(client, options) {
-		this.options = options;
-
-		/**
-		 * The client that instantiated this Websocket manager
-		 * @type {Client}
-		 */
-		Object.defineProperty(this, 'client', { value: client });
-
-		/**
-		 * The WebSocket connection of this manager
-		 * @type {?WebSocketConnection}
-		 */
-		this.ws = null;
-	}
+	public constructor(public readonly client: Client, public options: any) {}
 
 	/**
 	 * Connects the client to the WebSocket.
 	 * @returns {void}
 	 */
-	connect() {
+	public connect() {
 		this.ws = new WS('wss://irc-ws.chat.twitch.tv:443');
 		this.ws.onopen = this.onOpen.bind(this);
 		this.ws.onerror = this.onError.bind(this);
@@ -50,30 +44,31 @@ class WebSocket {
 	/**
 	 * TODO: Refactor `CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands`
 	 */
-	onOpen() {
+	private onOpen() {
 		this.client.emit('debug', 'Connecting');
-		this.ws.send(`CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands`);
-		this.ws.send(`PASS ${this.options.oauth}`);
-		this.ws.send(`NICK ${this.options.username}`);
+		this.ws!.send('CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands');
+		this.ws!.send(`PASS ${this.options.oauth}`);
+		this.ws!.send(`NICK ${this.options.username}`);
 		for (const channel of this.options.channels) {
-			this.ws.send(`JOIN ${channel}`);
+			this.ws!.send(`JOIN ${channel}`);
 		}
 	}
 
-	onError(error) {
+	private onError(error: any) {
 		this.client.emit('error', error);
 	}
 
-	onClose(close) {
+	private onClose(close: any) {
 		this.client.emit('disconnect', close);
 	}
 
 	/**
 	 * TODO: finish all of this eventually
 	 */
-	onMessage(packet) {
+	private onMessage(packet: any) {
 		this.client.emit('debug', packet.data);
 		const parsed = parser(packet.data);
+		if (!parsed) return;
 		if (parsed.command === '001') {
 			this.client.emit('ready', 'Ready! Woop!');
 		}
@@ -87,18 +82,18 @@ class WebSocket {
 		}
 		if (parsed.command === 'PART') {
 			const channelName = parsed.params[0].toLowerCase();
-			if (!parsed.prefix.includes(this.client.options.username)) {
+			if (parsed.prefix && !parsed.prefix.includes(this.client.options.username)) {
 				const username = parsed.prefix.split('!')[0];
 				this.client.emit('user_leave', username, channelName);
 				return;
 			}
-			const channel = find(this.client.channels, c => c.name === channelName);
+			const channel = find(this.client.channels, (c: Channel) => c.name === channelName);
 			this.client.emit('channel_leave', channel);
 			this.client.channels.delete(channel.id);
 		}
 		if (parsed.command === 'JOIN') {
-			if (parsed.prefix.includes(this.client.options.username)) return;
-			const username = parsed.prefix.split('!')[0];
+			if (parsed.prefix && parsed.prefix.includes(this.client.options.username)) return;
+			const username = parsed.prefix!.split('!')[0];
 			const channelName = parsed.params[0].toLowerCase();
 			this.client.emit('user_join', username, channelName);
 		}
@@ -106,7 +101,7 @@ class WebSocket {
 			this.client.emit('message', new Message(this.client, parsed));
 		}
 		if (packet.data.includes('PING')) {
-			this.ws.send('PONG :tmi.twitch.tv');
+			this.ws!.send('PONG :tmi.twitch.tv');
 			this.client.emit('debug', 'Received ping, responded with pong!');
 		}
 	}
@@ -116,7 +111,8 @@ class WebSocket {
 	 * @param  {Object} packet The packet
 	 * @returns {void}
 	 */
-	send(packet) {
+	public send(packet: any) {
+		if (!this.ws) return;
 		this.ws.send(packet);
 	}
 
@@ -124,10 +120,9 @@ class WebSocket {
 	 * Closes the Websocket connection.
 	 * @return {void}
 	 */
-	close() {
+	public close() {
+		if (!this.ws) return;
 		this.ws.close();
-		this.ws = null;
+		this.ws = undefined;
 	}
 }
-
-module.exports = WebSocket;

@@ -1,10 +1,18 @@
-function parse(data) {
+interface ParsedMessage {
+	raw: any;
+	tags: any;
+	prefix?: string;
+	command?: string;
+	params: string[];
+}
+
+export default function parse(data: any) {
 	data = data.replace(/\r\n|\n|\r/g, '');
-	const message = {
+	const message: ParsedMessage = {
 		raw: data,
 		tags: {},
-		prefix: null,
-		command: null,
+		prefix: undefined,
+		command: undefined,
 		params: []
 	};
 
@@ -19,7 +27,7 @@ function parse(data) {
 	// Updates the position based on whitespace position to ensure that spacePos < pos after skipping whitespace.
 	const updatePosition = () => {
 		pos = spacePos + 1;
-	}
+	};
 
 	skipSpaces();
 	// Parses tags which are in the form '@' <tags> <space>
@@ -88,5 +96,3 @@ function parse(data) {
 
 	return message;
 }
-
-module.exports = parse;

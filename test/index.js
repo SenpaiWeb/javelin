@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client } = require('../src/index');
+const { Client } = require('../dist/index');
 const client = new Client({ oauth: process.env.OAUTH, username: 'hieibot', channels: ['#justcrawl', '#ice_poseidon'] });
 
 client.on('debug', console.log);
