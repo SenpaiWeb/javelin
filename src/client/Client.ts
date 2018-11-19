@@ -2,6 +2,12 @@ import * as EventEmitter from 'events';
 import WebSocket from './websocket/WebSocket.js';
 import Channel from '../structs/Channel';
 
+interface ClientOptions {
+	oauth: string;
+	username: string;
+	channels: string[];
+}
+
 /**
  * The client.
  * @extends {EventEmitter}
@@ -10,9 +16,8 @@ export default class Client extends EventEmitter {
 	/**
 	 * The WebSocket manager for this client
 	 * @type {WebSocket}
-	 * @private
 	 */
-	private ws = new WebSocket(this, this.options);
+	public readonly ws = new WebSocket(this, this.options);
 
 	/**
 	 * The channels collection
@@ -23,7 +28,7 @@ export default class Client extends EventEmitter {
 	/**
 	 * @param {ClientOptions} [options] Options for the client
 	 */
-	public constructor(public readonly options = {}) {
+	public constructor(public readonly options: ClientOptions) {
 		super();
 	}
 
