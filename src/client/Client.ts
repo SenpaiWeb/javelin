@@ -1,6 +1,8 @@
 import * as EventEmitter from 'events';
 import WebSocket from './websocket/WebSocket.js';
 import Channel from '../structs/Channel';
+import Message from '../structs/Message.js';
+import User from '../structs/User.js';
 
 interface ClientOptions {
 	oauth: string;
@@ -68,6 +70,15 @@ export default class Client extends EventEmitter {
 	 */
 	public destroy() {
 		this.ws.close();
+	}
+
+	public on(event: 'debug' | 'warn', listener: (info: string) => void): this;
+	public on(event: 'error' | 'disconnect', listener: (error: Error) => void): this;
+	public on(event: 'message', listener: (message: Message) => void): this;
+	public on(event: 'channel_join' | 'channel_leave', listener: (channel: Channel) => void): this;
+	public on(event: 'user_join' | 'user_leave', listener: (user: User, channel: Channel) => void): this;
+	public on(event: string, listener: (...args: any[]) => void): this {
+		return super.on(event, listener);
 	}
 }
 
